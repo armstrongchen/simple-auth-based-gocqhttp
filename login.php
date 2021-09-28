@@ -14,7 +14,7 @@ require_once ($_SERVER['DOCUMENT_ROOT']."/login.php");
 
 别忘了在网站根目录创建 log 文件夹，并赋予适当权限，用来存放身份验证文件及登录日志。其外，Go-CQHTTP 用来登录的 QQ 必须具有该群的管理员权限，否则无法发送临时会话。
 
-有任何使用上的问题，可以加群讨论，群号在代码当中。此外，本群以视障学生为主。
+有任何使用上的问题，可以开启 Issue。
 
 本程序经过多次迭代，其中的变量可能看起来有点乱，不要介意。
 
@@ -25,6 +25,7 @@ define ("postfix","postfix"); // 在要加密的字串后面加上后缀，相�
 define ("filename_postfix", "_filename"); // 临时认证文件名称的后缀，防止未经授权的下载。
 define ("cookie_valid_period", 604800); // 认证 Cookie 的最长有效时间。
 define ("cqhttp_accesskey", "accesskey"); // CQHTTP 的访问令牌
+define ("qq_group", "123456789"); // 要检查成员的 QQ 群，GO-CQHTTP 登录的 QQ 必须是该群的管理员。
 define ("inviteurl_prefix", "https://example.com/login.php"); // 邀请 URL 的前缀，请修改成您网站的域名。
 
 $stored_access_key = "12345678"; // 设定预共享密钥（PSK），以防止群外人员骚扰群成员。
@@ -137,7 +138,7 @@ exit();
 
 // Checking user permission
 // 获取群成员列表
-$group_members_array = json_decode (file_get_contents ("http://127.0.0.1:5701/get_group_member_list?access_token=".cqhttp_accesskey."&group_id=493728167"),true);
+$group_members_array = json_decode (file_get_contents ("http://127.0.0.1:5701/get_group_member_list?access_token=".cqhttp_accesskey."&group_id=".qq_group),true);
 $group_members_list_array = $group_members_array['data'];
 // 统计会员人数，由于数组成员序号从 0 开始，所以总数应减去 1
 $group_members_count_number = count ($group_members_list_array) - 1;
@@ -179,8 +180,8 @@ file_put_contents ($verify_file,$verify_content_array);
 // Send a invite
 $invite_url = urlencode (inviteurl_prefix."?action=loginverify&qq=".$qq."&hash=".$hash_text."&referer=".$referer);
 $message = urlencode ("您好，您正在进行校园设施身份认证，请将下面的链接复制到浏览器中打开，如果您是从 QQ 进入校园的身份验证网页，请直接点击下面的链接，谢谢！");
-file_get_contents ("http://127.0.0.1:5701/send_private_msg?access_token=".cqhttp_accesskey."&group_id=493728167&user_id=".$qq."&message=".$message);
-file_get_contents ("http://127.0.0.1:5701/send_private_msg?access_token=".cqhttp_accesskey."&group_id=493728167&user_id=".$qq."&message=".$invite_url);
+file_get_contents ("http://127.0.0.1:5701/send_private_msg?access_token=".cqhttp_accesskey."&group_id=".qq_group."&user_id=".$qq."&message=".$message);
+file_get_contents ("http://127.0.0.1:5701/send_private_msg?access_token=".cqhttp_accesskey."&group_id=".qq_group."&user_id=".$qq."&message=".$invite_url);
 echo "请打开您的 QQ，然后根据校园助理的消息完成后续认证。";
 exit();
 }
